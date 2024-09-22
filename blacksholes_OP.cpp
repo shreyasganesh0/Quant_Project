@@ -39,6 +39,62 @@ double cumulativeStandardNormal(double x) {
     return 0.5 * (1.0 + erf(x / sqrt(2.0)));
 }
 
+// Black Scholes Model for option pricing
+Contract blackScholesOptionPricing(double S0, double K, double r, double sigma, double T, bool isCallOption) {
+    Contract con;
+    int days_till_expiry = T * 365.2425;
+    con.dte = days_till_expiry;
+
+    if (isCallOption)
+    {
+        double d1 = (log(S0/K) + (r + ((sigma * sigma) / 2)) * T) / (sigma * std::sqrt(T));
+
+        double d2 = d1 - (sigma * std::sqrt(T));
+
+        con.premium = S0 * cumulativeStandardNormal(d1) - K * std::exp(-r * T) * cumulativeStandardNormal(d2);
+
+        con.delta = cumulativeStandardNormal(d1);
+
+        con.gamma = cumulativeStandardNormal(d1) / (S0 * sigma * std::sqrt(T));
+
+        con.theta = (-(S0 * cumulativeStandardNormal(d1) * sigma) / (2 * std::sqrt(T))) - (r * K * std::exp(-r * T) * cumulativeStandardNormal(d2));
+
+        con.vega = S0 * cumulativeStandardNormal(d1) * std::sqrt(T);
+
+        con.rho = K * T * std::exp(-r * T) * cumulativeStandardNormal(d2);
+
+        con.implied_volatility = sigma - ((con.premium - (con.premium - 0.01))/(con.vega));
+
+        con.intrinsic_value = std::max(S0 -K, 0.0);
+
+    }
+
+    else
+    {
+        double d1 = (log(S0/K) + (r + ((sigma * sigma) / 2)) * T) / (sigma * std::sqrt(T));
+
+        double d2 = d1 - (sigma * std::sqrt(T));
+
+        con.premium = K * std::exp(-r * T) * cumulativeStandardNormal(-d2) - S0 * cumulativeStandardNormal(-d1);
+
+        con.delta = cumulativeStandardNormal(d1) - 1;
+
+        con.gamma = cumulativeStandardNormal(d1) / (S0 * sigma * std::sqrt(T));
+
+        con.theta = (-(S0 * cumulativeStandardNormal(d1) * sigma) / (2 * std::sqrt(T))) + (r * K * std::exp(-r * T) * cumulativeStandardNormal(-d2));
+
+        con.vega = S0 * cumulativeStandardNormal(d1) * std::sqrt(T);
+
+        con.rho = -K * T * std::exp(-r * T) * cumulativeStandardNormal(-d2);
+
+        con.implied_volatility = sigma - (((con.premium - 0.01) - con.premium)/(con.vega));
+
+        con.intrinsic_value = std::max(K - S0, 0.0);
+    }
+
+    return con;
+
+}
 
 int main() {
     // Option parameters
