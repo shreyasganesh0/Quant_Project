@@ -38,9 +38,25 @@ double erf(double x) {
 double cumulativeStandardNormal(double x) {
     return 0.5 * (1.0 + erf(x / sqrt(2.0)));
 }
-
+/**
+ * @brief 
+ * delta is the amount of change of the premium per dollar increase in the stock price 
+ *  (probability of an option expiring with strike price lesser than stock proce (in the money))
+ * theta represents time decay (stock price< strike (out of the money) price and it expires the option becomes worth 0)
+ * vega change in option premium with volatility
+ * rho how sensitive it is to the risk free rate(not as impornant since risk free rate doesnt change as much)
+ * implied volatility gives the option price close to the current market price of the option when inputted into the black sholes model
+ * @param S0 
+ * @param K 
+ * @param r 
+ * @param sigma 
+ * @param T 
+ * @param isCallOption 
+ * @return Contract 
+ */
 // Black Scholes Model for option pricing
 Contract blackScholesOptionPricing(double S0, double K, double r, double sigma, double T, bool isCallOption) {
+
     Contract con;
     int days_till_expiry = T * 365.2425;
     con.dte = days_till_expiry;
