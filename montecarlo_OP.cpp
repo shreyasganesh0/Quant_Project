@@ -10,6 +10,15 @@ double generateGaussianNoise(double mean, double stddev) {
     return distribution(generator);
 }
 
+// Function to calculate the payoff of a European call option
+double callOptionPayoff(double S, double K) {
+    return std::max(S - K, 0.0);
+}
+
+// Function to calculate the payoff of a European put option
+double putOptionPayoff(double S, double K) {
+    return std::max(K - S, 0.0);
+}
 int main() {
     // Option parameters
     double S0 = 100.0;   // Initial stock price
