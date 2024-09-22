@@ -3,6 +3,13 @@
 #include <random>
 #include <vector>
 
+// Function to generate normally distributed random numbers
+double generateGaussianNoise(double mean, double stddev) {
+    static std::mt19937 generator(std::random_device{}());
+    std::normal_distribution<double> distribution(mean, stddev);
+    return distribution(generator);
+}
+
 int main() {
     // Option parameters
     double S0 = 100.0;   // Initial stock price
