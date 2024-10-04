@@ -4,11 +4,10 @@
 #include <iomanip>
 #include "order.h"
 
-class OrderBook {
+class OrderBook:private Order{
 public:
     // Enumerations for order types and sides
-    enum class OrderType { Market, Limit, Stop, GoodTillCanceled, FillOrKill_Limit };
-    enum class Side { Buy, Sell };
+   
 
     // Method to add an order to the order book
     void addOrder(const Order& order) {
