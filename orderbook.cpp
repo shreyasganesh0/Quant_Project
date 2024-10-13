@@ -48,18 +48,18 @@ public:
     orderSide_{ orderSide }, 
     orderId_{ orderId }, 
     price_{ price }, 
-    initialOrderQty_{ orderQty },
-    remainingOrderQty_{ orderQty },
+    initialQty_{ orderQty },
+    remainingQty_{ orderQty },
     {}
 
     OrderType GetOrderType() const { return orderType_; }
     OrderSide GetOrderSide() const { return orderTSide_; }
     OrderId GetOrderID() const { return orderId_; }
     Price GetPrice() const { return Price_; }
-    OrderQty GetRemainingOrderQty() const { return remainingOrderQty_; }
-    OrderQty GetInitialOrderQty() const { return initialOrderQty_; }
-    OrderQty GetFilledOrderQty() const { return GetInitialOrderQty()-GetRemainingOrderQty(); }
-
+    OrderQty GetRemainingQty() const { return remainingQty_; }
+    OrderQty GetInitialQty() const { return initialQty_; }
+    OrderQty GetFilledQty() const { return GetInitialQty()-GetRemainingQty(); }
+    bool IsFilled() const{ return GetRemainingQty() == 0;}
     void Fill(OrderQty orderQty){
         if(orderQty>getRemainingOrderQty){
             throw std::logic_error(std::format("Order ({}) cannot be filled for more than its remaining quantity", GetOrderID()));
@@ -126,6 +126,90 @@ class Trade{
 }
 
 using Trades = std::vector<Trade>
+
+class OrderBook{
+    private:
+
+    struct OrderEntry{
+        OrderPointer order_{ nullptr};
+        OrderPointers::iterator location;
+
+        std::map<Price, OrderPointers, std::greater<Price>> bids_; 
+        std::map<Price, OrderPointers, std::lesser<Price>> asks_;
+        std::unordered_map<OrderId, OrderEntry> orders_;
+
+        bool CanMatch(Side side, Price price){
+            if (side == Side::Buy){
+                if asks_.Empty(){
+                    return false;
+                    
+                    const auto& [bestAsk, _]= *asks_.begin();
+                    return price >= bestAsk;
+                }
+            }
+            else{
+                if bids_.Empty(){
+
+                    return false;
+
+                    const auto& [bestBid, _] = *bids_.begin();
+                    return price<= bestBid;
+
+                }
+
+                    
+                }
+
+            }
+        
+        Trades MatchOrders()
+        {
+            Trades trades;
+            trades.reserve(orders_.size());
+
+            while (true){
+                if (bids_.empty() || asks_.empty())
+                    break;
+                
+                auto& [bidPrice, bids]= *bids_.begin();
+                auto& [askPrice, asks]= *asks_.begin();
+
+                if (bidPrice<askPrice)
+                    break;
+
+                while(bids.size() && asks.size()){
+
+                    auto& bid= bids.front();
+                    auto& ask= asks.front();
+
+                    Qty qty = std::min(ask -> GetRemainingQty, bid -> GetRemaningQty);
+
+                    bid->FillQty();
+                    ask->FillQty();
+
+                    if(bid -> IsFilled()){
+                        bids.pop_front();
+                        orders_.erase(bid -> GetOrderId())
+
+                    }
+
+                    if(ask -> IsFilled()){
+                        asks.pop_front();
+                        orders_.erase(ask -> GetOrderId())
+                        
+                    }
+
+
+                }
+
+
+                
+            }
+        }
+
+
+
+    }
 int main()
 {
  return 0;
